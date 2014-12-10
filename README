@@ -1,0 +1,43 @@
+ARM Configuration
+-----------------
+# ./configure --host=arm-fsl-linux-gnueabi --disable-nfsv4 --disable-nfsv41 --disable-gss --disable-uuid --enable-mount=yes --without-tcp-wrappers --with-gnu-ld
+
+x86 Configuration
+-----------------
+# apt-get install libnfsidmap-dev libwrap0-dev libdevmapper-dev libblkid-dev
+# ./configure --disable-nfsdcltrack --disable-gss
+
+Steps to run NFS server in PC (without nfs-kernel-server script) 
+-----------------------------
+# mount -t nfsd nfsd /proc/fs/nfsd
+# exportfs -r
+# rpc.nfsd 8 --no-nfs-version 4
+# /usr/sbin/rpc.mountd --manage-gids --no-nfs-version 4
+
+SIMULATION of NFS SERVER REQUIREMENT FOR DEA600 in PC
+-----------------------------------------------------
+# apt-get install nfs-kernel-server
+# dd if=/dev/zero of=/IPOD bs=1M count=26
+# dd if=/dev/zero of=/SXM bs=1M count=26
+# dd if=/dev/zero of=/REFLASH bs=1M count=41
+# mke2fs -j -F -b 1024 /IPOD
+# mke2fs -j -F -b 1024 /SXM
+# mke2fs -j -F -b 1024 /REFLASH
+# mount -o loop /IPOD /DEA610_shared/iPod
+# mount -o loop /SXM /DEA610_shared/sxm
+# mount -o loop /REFLASH /DEA610_shared/dea610_fbl
+
+# vim /etc/exports
+/DEA610_shared/iPod       	192.168.42.130(rw,nohide,no_root_squash,async)
+/DEA610_shared/sxm       	192.168.42.130(rw,nohide,no_root_squash,async)
+/DEA610_shared/dea610_fbl       192.168.42.130(rw,nohide,no_root_squash,async)
+
+# exportfs -ra
+# /etc/init.d/nfs-kernel-server restart
+
+CLIENT SIDE SETUP - DEA610
+--------------------------
+# apt-get install nfs-common
+# mount -t nfs -o proto=tcp,port=2049 192.168.42.129:/DEA610_shared/iPod	/mnt/iPod
+# mount -t nfs -o proto=tcp,port=2049 192.168.42.129:/DEA610_shared/sxm		/mnt/sxm
+# mount -t nfs -o proto=tcp,port=2049 192.168.42.129:/DEA610_shared/dea610_fbl	/mnt/dea610_fbl
